@@ -1,6 +1,7 @@
 import os
 import time
 import openai
+import asyncio
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
@@ -87,12 +88,8 @@ def get_conversational_chain(tool, ques):
 
 
 async def generate_recipe(user_question):
-    """
-    Load (or create) the knowledge base, create the retrieval tool,
-    and get the answer to the user's question.
-    """
     try:
-        new_db = get_knowledge_hub_instance()
+        new_db = await asyncio.to_thread(get_knowledge_hub_instance)
     except Exception as e:
         st.error("Error loading/creating the knowledge base. Please try updating it.")
         return
@@ -103,19 +100,16 @@ async def generate_recipe(user_question):
         "pdf_extractor",
         "Tool to answer queries from the Canprev knowledge base PDFs.",
     )
-    response = get_conversational_chain(retrieval_chain, user_question)
+    # Offload the blocking call to a thread:
+    response = await asyncio.to_thread(get_conversational_chain, retrieval_chain, user_question)
     return response
 
 
-def generate_recipe_image(recipe_text):
-    """
-    Generate an AI image for the given recipe using OpenAI's image generation API.
-    Uses the first 150 characters of the recipe text as context for the image prompt.
-    """
-    # Using a snippet of the recipe text to form a prompt.
+
+async def generate_recipe_image(recipe_text):
     prompt = f"Generate a high-quality, appetizing image for a dish described as: {recipe_text[:200]}"
     try:
-        response = openai.images.generate(prompt=prompt, n=1, size="512x512")
+        response = openai.images.generate (prompt=prompt, n=1, size="512x512")
         return response.data[0].url
     except Exception as e:
         st.error(f"Error generating recipe image: {e}")

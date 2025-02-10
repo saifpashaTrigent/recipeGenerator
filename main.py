@@ -73,7 +73,7 @@ async def main():
             
         with col2:
             st.markdown("### Recipe Image")
-            recipe_image_url = generate_recipe_image(recipe_text["output"])
+            recipe_image_url = await generate_recipe_image(recipe_text["output"])
             if recipe_image_url:
                 st.image(recipe_image_url, caption=selected_product, width=400)
             
