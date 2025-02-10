@@ -13,7 +13,6 @@ from functions.doc_processor import (
 )
 from services.constants import CANPREV_IMAGE_PATH
 
-# Load environment variables (including OPENAI_API_KEY)
 load_dotenv(override=True)
 
 

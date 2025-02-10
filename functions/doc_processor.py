@@ -7,7 +7,7 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI
 from langchain.tools.retriever import create_retriever_tool
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -64,7 +64,14 @@ def get_conversational_chain(tool, ques):
     """
     Set up the conversational chain with your LLM and the retrieval tool.
     """
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
+    # llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
+    llm = AzureChatOpenAI(
+        api_key=os.getenv("AZURE_API_KEY"),
+        api_version=os.getenv("AZURE_API_VERSION"),
+        azure_deployment=os.getenv("AZURE_DEPLOYMENT_MODEL"),
+        azure_endpoint=os.getenv("AZURE_ENDPOINT"),
+        temperature=0.1,
+    )
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", system_prompt),
@@ -99,13 +106,14 @@ async def generate_recipe(user_question):
     response = get_conversational_chain(retrieval_chain, user_question)
     return response
 
+
 def generate_recipe_image(recipe_text):
     """
     Generate an AI image for the given recipe using OpenAI's image generation API.
     Uses the first 150 characters of the recipe text as context for the image prompt.
     """
     # Using a snippet of the recipe text to form a prompt.
-    prompt = f"Generate a high-quality, appetizing image for a dish described as: {recipe_text[:150]}"
+    prompt = f"Generate a high-quality, appetizing image for a dish described as: {recipe_text[:200]}"
     try:
         response = openai.images.generate(prompt=prompt, n=1, size="512x512")
         return response.data[0].url
