@@ -2,3 +2,6 @@
 __pycache__
 .vscode
 models
+faiss_index
+index.faiss
+index.pkl
