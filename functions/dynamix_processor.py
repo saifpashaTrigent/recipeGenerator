@@ -1,0 +1,93 @@
+import streamlit as st
+from functions.product_details import product_images
+from dotenv import load_dotenv
+import openai
+import json
+
+load_dotenv(override=True)
+
+
+def get_autocomplete_suggestions(partial_query):
+    """
+    Given a partial query, ask GPT-4o to suggest completions that focus on Canprev products.
+    Returns a list of suggestion strings.
+    Caches results in session_state to avoid repeated calls.
+    """
+    if not partial_query or len(partial_query) < 3:
+        return []
+
+    if "autocomplete_cache" not in st.session_state:
+        st.session_state.autocomplete_cache = {}
+
+    if partial_query in st.session_state.autocomplete_cache:
+        return st.session_state.autocomplete_cache[partial_query]
+
+    # Updated prompt: Focus specifically on Canprev products.
+    prompt = (
+        f"Given the following partial question about Canprev products: '{partial_query}', "
+        "provide three complete suggestions to finish this question that specifically reference "
+        "Canprev's range of health and wellness products. "
+        "Return the suggestions as a JSON array of strings using double quotes for the strings, "
+        "and do not include any extra text."
+    )
+
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o",  # Adjust if needed.
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an assistant that provides autocomplete suggestions for product questions, "
+                        "with a special focus on Canprev's innovative health and wellness products. "
+                        "Return your answer as a JSON array of strings without any additional explanation."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.3,
+            max_tokens=150,
+        )
+        suggestions_str = response.choices[0].message.content
+        suggestions = json.loads(suggestions_str)
+        if not isinstance(suggestions, list):
+            suggestions = []
+    except Exception as e:
+        st.error(f"Suggestion error: {e}")
+        suggestions = []
+
+    st.session_state.autocomplete_cache[partial_query] = suggestions
+    return suggestions
+
+
+def update_autocomplete():
+    """
+    Callback for text input changes.
+    (No additional action required here.)
+    """
+    pass
+
+
+def query_gpt4o(user_query, chat_history):
+    """
+    Given the current query and conversation history, ask GPT-4o for an answer.
+    """
+    system_message = (
+        "You are an expert on the following products: "
+        + ", ".join(list(product_images.keys()))
+        + ". Answer questions about these products in a helpful and detailed manner."
+    )
+    messages = [{"role": "system", "content": system_message}]
+    messages.extend(chat_history)
+    messages.append({"role": "user", "content": user_query})
+
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            temperature=0.7,
+        )
+        answer = response.choices[0].message.content
+    except Exception as e:
+        answer = f"Error: {e}"
+    return answer
