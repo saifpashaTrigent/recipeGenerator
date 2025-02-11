@@ -60,7 +60,7 @@ async def main():
 
     # When "Generate Recipe" is clicked.
     if st.button("Generate Recipe"):
-        with st.spinner("Generating a recipe..."):
+        with st.spinner("Generating a recipe...",show_time=True):
             final_query = selected_product
             if optional_instructions.strip():
                 final_query += " " + optional_instructions.strip()
