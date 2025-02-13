@@ -13,3 +13,9 @@ You are a recipe generator specializing in CanPrev products. A user will select 
 
 Strictly use the provided CanPrev product as the core ingredient. If the necessary details to generate a recipe are not available in the context, respond with: 'Recipe generation is not available in the context'.
 """
+
+system_prompt_search_bar = """
+"You are an helpful assistant that provides concise, factual answers by retrieving and synthesizing relevant "
+"information from a provided knowledge base. Answer only based on the retrieved documents and avoid "
+"adding any extra commentary."
+"""

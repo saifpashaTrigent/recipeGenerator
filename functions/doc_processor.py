@@ -5,14 +5,14 @@ import asyncio
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
+from services.utils import llm
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import AzureChatOpenAI
 from langchain.tools.retriever import create_retriever_tool
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from functions.prompt import system_prompt
+from services.prompt import system_prompt
 from services.constants import DATA_FOLDER, VECTOR_DB
 
 load_dotenv(override=True)
@@ -65,14 +65,6 @@ def get_conversational_chain(tool, ques):
     """
     Set up the conversational chain with your LLM and the retrieval tool.
     """
-    # llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
-    llm = AzureChatOpenAI(
-        api_key=os.getenv("AZURE_API_KEY"),
-        api_version=os.getenv("AZURE_API_VERSION"),
-        azure_deployment=os.getenv("AZURE_DEPLOYMENT_MODEL"),
-        azure_endpoint=os.getenv("AZURE_ENDPOINT"),
-        temperature=0.1,
-    )
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", system_prompt),

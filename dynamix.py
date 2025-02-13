@@ -5,8 +5,8 @@ from functions.product_details import product_images
 from functions.doc_processor import get_pdf_texts, create_knowledge_hub
 from functions.dynamix_processor import (
     get_autocomplete_suggestions,
-    query_gpt4o,
     update_autocomplete,
+    generate_knowledge_answer,
 )
 from services.constants import CANPREV_IMAGE_PATH
 
@@ -16,6 +16,7 @@ load_dotenv(override=True)
 def main():
     st.set_page_config(page_title="Product Q&A", page_icon="🍲", layout="wide")
 
+    # Sidebar: About and Knowledge Base update.
     with st.sidebar:
         st.image(CANPREV_IMAGE_PATH, width=200)
         st.markdown("## About Canprev")
@@ -33,11 +34,13 @@ def main():
                 create_knowledge_hub(documents)
                 st.success("Knowledge Base updated successfully!")
 
+    # Main title and instructions.
     st.title("Product Q&A With AI Search Bar")
     st.markdown(
-        "Ask a question about our products. As you type, autocomplete suggestions will be provided."
+        "Ask a question about our products...."
     )
 
+    # Set up the text input.
     if "user_query" not in st.session_state:
         st.session_state.user_query = ""
     user_query = st.text_input(
@@ -48,6 +51,7 @@ def main():
         on_change=update_autocomplete,
     )
 
+    # Get autocomplete suggestions if the query is at least 3 characters.
     suggestions = (
         get_autocomplete_suggestions(user_query)
         if user_query and len(user_query) >= 3
@@ -57,37 +61,38 @@ def main():
         st.markdown("**Suggestions:**")
         for suggestion in suggestions:
             if st.button(suggestion, key=suggestion):
-                with st.spinner("thinking..."):
-                    answer = query_gpt4o(
-                        suggestion, st.session_state.get("chat_history", [])
-                    )
+                with st.spinner("Thinking..."):
+                    answer_response = generate_knowledge_answer(suggestion)
                 if "chat_history" not in st.session_state:
                     st.session_state.chat_history = []
                 st.session_state.chat_history.append(
                     {"role": "user", "content": suggestion}
                 )
                 st.session_state.chat_history.append(
-                    {"role": "assistant", "content": answer}
+                    {"role": "assistant", "content": answer_response.get("output", "")}
                 )
 
+    # Ensure conversation history exists.
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
+    # When the user clicks "Submit Query".
     if st.button("Submit Query"):
         if user_query:
             with st.spinner("Thinking..."):
-                answer = query_gpt4o(user_query, st.session_state.chat_history)
+                answer_response = generate_knowledge_answer(user_query)
             st.session_state.chat_history.append(
                 {"role": "user", "content": user_query}
             )
             st.session_state.chat_history.append(
-                {"role": "assistant", "content": answer}
+                {"role": "assistant", "content": answer_response.get("output", "")}
             )
 
-    # Display conversation as chat messages.
+    # Display conversation messages.
     if st.session_state.chat_history:
         st.markdown("---")
         st.subheader("Conversation")
+        # Display messages as pairs (user and assistant).
         pairs = [
             st.session_state.chat_history[i : i + 2]
             for i in range(0, len(st.session_state.chat_history), 2)
