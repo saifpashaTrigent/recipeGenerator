@@ -3,11 +3,11 @@ import asyncio
 import streamlit as st
 from dotenv import load_dotenv
 from functions.product_details import product_categories, product_images
+from functions.pdf import parse_recipe_name, create_pdf
 from functions.doc_processor import (
     get_pdf_texts,
     create_knowledge_hub,
-    generate_recipe,
-    generate_product_description,
+    generate_recipe,  
     stream_data,
     generate_recipe_image
 )
@@ -20,14 +20,12 @@ async def main():
     st.set_page_config(page_title="Recipe Generator", page_icon="🍲", layout="wide")
 
     st.title("Recipe Generator")
-    st.markdown(
+    st.info(
         """
-        Welcome to Canprev's Recipe Generator! This tool generates recipes or product insights based on our curated PDF files.
-        Select your product options from the sidebar and then click **Generate Recipe**.
+        Welcome to Canprev's Recipe Generator! Select your Product and click **Generate Recipe**.
         """
     )
 
-    # Sidebar: Product selection and Build/Update Knowledge Base
     with st.sidebar:
         st.image(CANPREV_IMAGE_PATH, width=160)
         st.header("Select Products")
@@ -45,50 +43,62 @@ async def main():
         else:
             st.warning(f"Image not found: {image_path_sidebar}")
 
-        if st.button("Build/Update Knowledge Base",type="primary"):
+        if st.button("Build/Update Knowledge Base", type="primary"):
             with st.spinner("Building the knowledge base from PDF files..."):
                 documents = get_pdf_texts()
                 create_knowledge_hub(documents)
                 st.success("Knowledge Base updated successfully!")
 
-    # Optional instructions: how the user wants the recipe to be.
+    # Optional instructions for the recipe.
     optional_instructions = st.text_area(
-        "Optional: Describe how you want the recipe to be",
+        label="Optional recipe instructions",
         placeholder="e.g. healthy, vegan, spicy, low-calorie, extra protein...",
-        height=100,
+        height=68,
     )
 
-    # When "Generate Recipe" is clicked.
-    if st.button("Generate Recipe",type="primary"):
-        with st.spinner("Generating a recipe...",show_time=True):
+    if st.button("Generate Recipe", type="primary"):
+        with st.spinner(
+            "Hold on... our genius chef is busy inventing a recipe for you...!"
+        ):
             final_query = selected_product
             if optional_instructions.strip():
                 final_query += " " + optional_instructions.strip()
+
             recipe_text = await generate_recipe(final_query)
 
+            recipe_name, cleaned_text = parse_recipe_name(recipe_text["output"])
+
+            # Generate the recipe image.
+            recipe_image_url = await generate_recipe_image(recipe_text["output"])
+
         col1, col2 = st.columns([2, 1])
-        with col1:
-            st.markdown("### Recipe Details")
-            st.write_stream(stream_data(recipe_text["output"]))
-            
         with col2:
             st.markdown("### Recipe Image")
-            recipe_image_url = await generate_recipe_image(recipe_text["output"])
             if recipe_image_url:
                 st.image(recipe_image_url, caption=selected_product, width=400)
-            
-        st.markdown("### Product Image")
-        image_path_main = product_images.get(selected_product)
-        if image_path_main and os.path.exists(image_path_main):
-            st.image(image_path_main, caption=selected_product, width=350)
-        else:
-            st.warning(f"Image not found: {image_path_main}")
-        st.markdown("---")
-        st.markdown("### Product Description")
-        description = await generate_product_description(selected_product)
-        st.write_stream(stream_data(description))
+            else:
+                st.warning("Could not generate recipe image.")
+
+        with col1:
+            st.markdown("### Recipe Details")
+            with st.spinner("Waiting for the image to load..."):
+                await asyncio.sleep(3)
+            st.write_stream(stream_data(recipe_text["output"]))
+
+            # Generate PDF and allow download.
+            if recipe_image_url and cleaned_text:
+                pdf_bytes = create_pdf(recipe_name, recipe_image_url, cleaned_text)
+                if pdf_bytes:
+                    st.download_button(
+                        label="Download Recipe as PDF",
+                        data=pdf_bytes,
+                        file_name=f"{recipe_name}_recipe.pdf",
+                        mime="application/pdf",
+                        type="primary",
+                    )
+                else:
+                    st.error("Error generating PDF.")
 
 
-# Run the async main function
 if __name__ == "__main__":
     asyncio.run(main())

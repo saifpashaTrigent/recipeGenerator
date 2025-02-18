@@ -17,7 +17,6 @@ from services.constants import DATA_FOLDER, VECTOR_DB
 
 load_dotenv(override=True)
 
-# Initialize embeddings
 embeddings = OpenAIEmbeddings()
 
 
@@ -101,7 +100,7 @@ async def generate_recipe(user_question):
 
 async def generate_recipe_image(recipe_description: str):
     """Generate a high-quality, appetizing image for a dish described by the given text."""
-    prompt = f"Generate a high-quality, appetizing image for a dish described as: {recipe_description[:150]}"
+    prompt = f"Generate a high-quality, appetizing image for a dish described as: {recipe_description[:50]}"
     try:
         response = openai.images.generate(prompt=prompt, n=1, size="512x512")
         return response.data[0].url
