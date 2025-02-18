@@ -54,7 +54,7 @@ async def main():
     custom_instructions = ""
     with st.expander("Custom Recipe Instructions (Optional)"):
         custom_instructions = st.text_area(
-            label="Describe how you want the recipe to be (optional)",
+            label="Describe how you want the recipe to be...",
             placeholder="e.g. healthy, vegan, spicy, low-calorie, extra protein...",
             height=68,
         )
