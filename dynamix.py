@@ -6,7 +6,7 @@ from functions.doc_processor import get_pdf_texts, create_knowledge_hub
 from functions.dynamix_processor import (
     get_autocomplete_suggestions,
     update_autocomplete,
-    generate_knowledge_answer,
+    generate_knowledge_answer
 )
 from services.constants import CANPREV_IMAGE_PATH
 
@@ -35,7 +35,7 @@ def main():
                 st.success("Knowledge Base updated successfully!")
 
     # Main title and instructions.
-    st.title("Product Q&A With AI Search Bar")
+    st.title("Product Q&A ")
     st.markdown(
         "Ask a question about our products...."
     )
