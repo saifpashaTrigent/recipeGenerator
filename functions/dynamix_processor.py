@@ -1,8 +1,6 @@
 import json
-import openai
 import streamlit as st
-from services.utils import llm
-from functions.product_details import product_images
+from services.utils import azureLlm, Azureclient
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
@@ -37,9 +35,8 @@ def get_autocomplete_suggestions(partial_query):
         "Return the suggestions as a JSON array of strings using double quotes for the strings, "
         "and do not include any extra text."
     )
-
     try:
-        response = openai.chat.completions.create(
+        response = Azureclient.chat.completions.create(
             model="gpt-4o",  # Adjust if needed.
             messages=[
                 {
@@ -75,31 +72,6 @@ def update_autocomplete():
     pass
 
 
-def query_gpt4o(user_query, chat_history):
-    """
-    Given the current query and conversation history, ask GPT-4o for an answer.
-    """
-    system_message = (
-        "You are an expert on the following products: "
-        + ", ".join(list(product_images.keys()))
-        + ". Answer questions about these products in a helpful and detailed manner."
-    )
-    messages = [{"role": "system", "content": system_message}]
-    messages.extend(chat_history)
-    messages.append({"role": "user", "content": user_query})
-
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,
-            temperature=0.7,
-        )
-        answer = response.choices[0].message.content
-    except Exception as e:
-        answer = f"Error: {e}"
-    return answer
-
-
 def get_conversational_chain_search_bar(tool, ques):
     """
     Set up the conversational chain with your LLM and the retrieval tool.
@@ -112,11 +84,10 @@ def get_conversational_chain_search_bar(tool, ques):
             ("placeholder", "{agent_scratchpad}"),
         ]
     )
-    agent = create_tool_calling_agent(llm, [tool], prompt)
+    agent = create_tool_calling_agent(azureLlm, [tool], prompt)
     agent_executor = AgentExecutor(agent=agent, tools=[tool], verbose=True)
     response = agent_executor.invoke({"input": ques})
     return response
-
 
 
 def generate_knowledge_answer(query):

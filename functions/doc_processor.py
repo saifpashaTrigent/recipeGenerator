@@ -5,7 +5,7 @@ import asyncio
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
-from services.utils import llm
+from services.utils import azureLlm
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
@@ -59,7 +59,6 @@ def get_knowledge_hub_instance():
             VECTOR_DB, embeddings, allow_dangerous_deserialization=True
         )
 
-
 def get_conversational_chain(tool, ques):
     """
     Set up the conversational chain with your LLM and the retrieval tool.
@@ -72,7 +71,7 @@ def get_conversational_chain(tool, ques):
             ("placeholder", "{agent_scratchpad}"),
         ]
     )
-    agent = create_tool_calling_agent(llm, [tool], prompt)
+    agent = create_tool_calling_agent(azureLlm, [tool], prompt)
     agent_executor = AgentExecutor(agent=agent, tools=[tool], verbose=True)
     response = agent_executor.invoke({"input": ques})
     return response
@@ -108,19 +107,19 @@ async def generate_recipe_image(recipe_description: str):
         return None
 
 
-async def generate_product_description(product):
-    """
-    Query the internal knowledge base to extract a detailed description for the given product.
-    This function uses the existing generate_recipe function with a specialized prompt.
-    """
-    # Create a prompt that instructs the system to provide a product description.
-    query = (
-        f"Provide a detailed product description for the Canprev product '{product}'. "
-        "Include information about its benefits, key ingredients, and usage instructions, "
-        "based on the internal knowledge base."
-    )
-    result = await generate_recipe(query)
-    return result["output"]
+# async def generate_product_description(product):
+#     """
+#     Query the internal knowledge base to extract a detailed description for the given product.
+#     This function uses the existing generate_recipe function with a specialized prompt.
+#     """
+#     # Create a prompt that instructs the system to provide a product description.
+#     query = (
+#         f"Provide a detailed product description for the Canprev product '{product}'. "
+#         "Include information about its benefits, key ingredients, and usage instructions, "
+#         "based on the internal knowledge base."
+#     )
+#     result = await generate_recipe(query)
+#     return result["output"]
 
 
 def stream_data(content):
