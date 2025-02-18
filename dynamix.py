@@ -28,7 +28,7 @@ def main():
             """
         )
         st.markdown("---")
-        if st.button("Build/Update Knowledge Base"):
+        if st.button("Build/Update Knowledge Base",type="primary"):
             with st.spinner("Building the knowledge base from PDF files..."):
                 documents = get_pdf_texts()
                 create_knowledge_hub(documents)
@@ -60,7 +60,7 @@ def main():
     if suggestions:
         st.markdown("**Suggestions:**")
         for suggestion in suggestions:
-            if st.button(suggestion, key=suggestion):
+            if st.button(suggestion, key=suggestion,type="primary"):
                 with st.spinner("Thinking..."):
                     answer_response = generate_knowledge_answer(suggestion)
                 if "chat_history" not in st.session_state:
@@ -77,7 +77,7 @@ def main():
         st.session_state.chat_history = []
 
     # When the user clicks "Submit Query".
-    if st.button("Submit Query"):
+    if st.button("Submit",type="primary"):
         if user_query:
             with st.spinner("Thinking..."):
                 answer_response = generate_knowledge_answer(user_query)

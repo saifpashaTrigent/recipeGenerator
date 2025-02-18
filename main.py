@@ -45,7 +45,7 @@ async def main():
         else:
             st.warning(f"Image not found: {image_path_sidebar}")
 
-        if st.button("Build/Update Knowledge Base"):
+        if st.button("Build/Update Knowledge Base",type="primary"):
             with st.spinner("Building the knowledge base from PDF files..."):
                 documents = get_pdf_texts()
                 create_knowledge_hub(documents)
@@ -59,7 +59,7 @@ async def main():
     )
 
     # When "Generate Recipe" is clicked.
-    if st.button("Generate Recipe"):
+    if st.button("Generate Recipe",type="primary"):
         with st.spinner("Generating a recipe...",show_time=True):
             final_query = selected_product
             if optional_instructions.strip():
