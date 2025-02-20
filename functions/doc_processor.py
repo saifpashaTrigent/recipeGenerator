@@ -5,7 +5,7 @@ import asyncio
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
-from services.utils import azureLlm
+from services.utils import azureLlm, imageClient
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
@@ -59,6 +59,7 @@ def get_knowledge_hub_instance():
             VECTOR_DB, embeddings, allow_dangerous_deserialization=True
         )
 
+
 def get_conversational_chain(tool, ques):
     """
     Set up the conversational chain with your LLM and the retrieval tool.
@@ -101,7 +102,7 @@ async def generate_recipe_image(recipe_description: str):
     """Generate a high-quality, appetizing image for a dish described by the given text."""
     prompt = f"Generate a high-quality, appetizing image for a dish described as: {recipe_description[:50]}"
     try:
-        response = openai.images.generate(prompt=prompt, n=1, size="512x512")
+        response = imageClient.images.generate(prompt=prompt, n=1, size="512x512")
         return response.data[0].url
     except Exception:
         return None
