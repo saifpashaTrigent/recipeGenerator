@@ -102,11 +102,11 @@ async def generate_recipe_image(recipe_description: str):
     """Generate a high-quality, appetizing image for a dish described by the given text."""
     prompt = (
     f"Generate a mouthwatering, high-quality, photorealistic image featuring a dish "
-    f"described as: {recipe_description[:50]}. Present the dish in a clean, inviting "
+    f"described as: {recipe_description[:500]}. Present the dish in a clean, inviting "
     "setting with soft, natural lighting that highlights the vibrant colors and textures. "
     "Emphasize fresh ingredients, attractive plating, and subtle garnishes to evoke a "
     "sense of culinary delight. Ensure the final image is visually captivating and "
-    "appetizing, making viewers want to taste it immediately."
+    "appetizing, making viewers want to taste it immediately. Focus more on the image to show."
 )
 
     try:
