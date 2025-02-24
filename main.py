@@ -4,7 +4,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from functions.product_details import product_categories, product_images
 from functions.pdf import parse_recipe_name, create_pdf
-from functions.doc_processor import (
+from functions.recipeProcessor import (
     get_pdf_texts,
     create_knowledge_hub,
     generate_recipe,  

@@ -2,8 +2,8 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 from functions.product_details import product_images
-from functions.doc_processor import get_pdf_texts, create_knowledge_hub
-from functions.dynamix_processor import (
+from functions.recipeProcessor import get_pdf_texts, create_knowledge_hub
+from functions.searchBarProcessor import (
     get_autocomplete_suggestions,
     update_autocomplete,
     generate_knowledge_answer
