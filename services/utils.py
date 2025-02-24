@@ -13,7 +13,7 @@ azureLlm = AzureChatOpenAI(
     api_version=os.getenv("AZURE_API_VERSION"),
     azure_deployment=os.getenv("AZURE_DEPLOYMENT_MODEL"),
     azure_endpoint=os.getenv("AZURE_ENDPOINT"),
-    temperature=0.1,
+    temperature=0.3,
 )
 
 Azureclient = AzureOpenAI(
