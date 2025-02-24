@@ -110,7 +110,7 @@ async def generate_recipe_image(recipe_description: str):
 )
 
     try:
-        response = imageClient.images.generate(prompt=prompt, n=1, size="512x512",model="dall-e-2")
+        response = imageClient.images.generate(prompt=prompt, n=1, size="1024x1024",model="dall-e-3")
         return response.data[0].url
     except Exception:
         return None
