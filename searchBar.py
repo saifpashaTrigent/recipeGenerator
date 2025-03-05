@@ -1,8 +1,8 @@
 import os
 import streamlit as st
 from dotenv import load_dotenv
-from functions.product_details import product_images
-from functions.recipeProcessor import get_pdf_texts, create_knowledge_hub
+from functions.product_details import product_categories, product_images
+from functions.recipeProcessor import get_pdf_texts, create_knowledge_hub, get_knowledge_hub_instance,stream_data
 from functions.searchBarProcessor import (
     get_autocomplete_suggestions,
     update_autocomplete,
@@ -12,6 +12,47 @@ from services.constants import CANPREV_IMAGE_PATH
 
 load_dotenv(override=True)
 
+def get_similar_products_kb(query):
+    """
+    Load the knowledge base, retrieve relevant documents for the query,
+    then search those documents for known product names (from product_images).
+    Returns a list of matching product names. If none are found, return a default list.
+    """
+    try:
+        knowledge_db = get_knowledge_hub_instance()
+    except Exception as e:
+        st.error("Error loading knowledge base. Please try updating it.")
+        return []
+    
+    retriever = knowledge_db.as_retriever(search_type="mmr", search_kwargs={"k": 1})
+    results = retriever.get_relevant_documents(query)
+    similar = set()
+    # For each retrieved document, check if any known product name appears.
+    for doc in results:
+        text = doc.page_content
+        for product in product_images.keys():
+            if product.lower() in text.lower():
+                similar.add(product)
+    # Fallback: if no similar products found, return the first 3 products as default.
+    if not similar:
+        similar = set(list(product_images.keys())[:3])
+        
+    return list(similar)
+
+def display_similar_products(similar_products):
+    """
+    Display similar products as image thumbnails.
+    """
+    if similar_products:
+        st.markdown("### Similar Products")
+        cols = st.columns(len(similar_products))
+        for idx, prod in enumerate(similar_products):
+            img_path = product_images.get(prod)
+            if img_path and os.path.exists(img_path):
+                cols[idx].image(img_path, width=200)
+                cols[idx].caption(prod)
+            else:
+                cols[idx].warning(f"Image not found for {prod}")
 
 def main():
     st.set_page_config(page_title="Product Q&A", page_icon="🍲", layout="wide")
@@ -23,22 +64,20 @@ def main():
         st.markdown(
             """
             **Canprev** is a leading provider of innovative health and wellness products.  
-            Our research-backed formulations are designed to help you achieve your health goals.  
-            Explore our products and feel free to ask any questions about them!
+            Our research-backed formulations help you achieve your health goals.  
+            Ask any question about our products!
             """
         )
         st.markdown("---")
-        if st.button("Build/Update Knowledge Base",type="primary"):
+        if st.button("Build/Update Knowledge Base", type="primary"):
             with st.spinner("Building the knowledge base from PDF files..."):
                 documents = get_pdf_texts()
                 create_knowledge_hub(documents)
                 st.success("Knowledge Base updated successfully!")
 
     # Main title and instructions.
-    st.title("Product Q&A ")
-    st.markdown(
-        "Ask a question about our products...."
-    )
+    st.title("Product Q&A")
+    st.markdown("Ask a question about our products....")
 
     # Set up the text input.
     if "user_query" not in st.session_state:
@@ -60,7 +99,9 @@ def main():
     if suggestions:
         st.markdown("**Suggestions:**")
         for suggestion in suggestions:
-            if st.button(suggestion, key=suggestion,type="primary"):
+            if st.button(suggestion, key=suggestion, type="primary"):
+                # Update effective query without modifying the widget value.
+                st.session_state.effective_query = suggestion  
                 with st.spinner("Thinking..."):
                     answer_response = generate_knowledge_answer(suggestion)
                 if "chat_history" not in st.session_state:
@@ -76,8 +117,8 @@ def main():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # When the user clicks "Submit Query".
-    if st.button("Submit",type="primary"):
+    # When the user clicks "Submit".
+    if st.button("Submit", type="primary"):
         if user_query:
             with st.spinner("Thinking..."):
                 answer_response = generate_knowledge_answer(user_query)
@@ -92,7 +133,6 @@ def main():
     if st.session_state.chat_history:
         st.markdown("---")
         st.subheader("Conversation")
-        # Display messages as pairs (user and assistant).
         pairs = [
             st.session_state.chat_history[i : i + 2]
             for i in range(0, len(st.session_state.chat_history), 2)
@@ -111,6 +151,14 @@ def main():
                 )
 
     st.markdown("---")
+    # Display similar products only if there's at least one conversation message.
+    if st.session_state.chat_history:
+        query_for_similar = st.session_state.get("effective_query", st.session_state.user_query)
+        if query_for_similar:
+            similar_products = get_similar_products_kb(query_for_similar)
+            display_similar_products(similar_products)
+
+    st.markdown("---")
     st.header("Our Products")
     cols = st.columns(3)
     for idx, (product, img_path) in enumerate(product_images.items()):
@@ -123,7 +171,6 @@ def main():
             )
         else:
             col.warning(f"Image not found: {img_path}")
-
 
 if __name__ == "__main__":
     main()

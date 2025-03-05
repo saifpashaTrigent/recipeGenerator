@@ -7,9 +7,9 @@ from functions.pdf import parse_recipe_name, create_pdf
 from functions.recipeProcessor import (
     get_pdf_texts,
     create_knowledge_hub,
-    generate_recipe,  
+    generate_recipe,
     stream_data,
-    generate_recipe_image
+    generate_recipe_image,
 )
 from services.constants import CANPREV_IMAGE_PATH
 
@@ -49,7 +49,6 @@ async def main():
                 documents = get_pdf_texts()
                 create_knowledge_hub(documents)
                 st.success("Knowledge Base updated successfully!")
-
 
     custom_instructions = ""
     with st.expander("Custom Recipe Instructions (Optional)"):
