@@ -2,15 +2,21 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 from functions.product_details import product_categories, product_images
-from functions.recipeProcessor import get_pdf_texts, create_knowledge_hub, get_knowledge_hub_instance,stream_data
+from functions.recipeProcessor import (
+    get_pdf_texts,
+    create_knowledge_hub,
+    get_knowledge_hub_instance,
+    stream_data,
+)
 from functions.searchBarProcessor import (
     get_autocomplete_suggestions,
     update_autocomplete,
-    generate_knowledge_answer
+    generate_knowledge_answer,
 )
 from services.constants import CANPREV_IMAGE_PATH
 
 load_dotenv(override=True)
+
 
 def get_similar_products_kb(query):
     """
@@ -23,7 +29,7 @@ def get_similar_products_kb(query):
     except Exception as e:
         st.error("Error loading knowledge base. Please try updating it.")
         return []
-    
+
     retriever = knowledge_db.as_retriever(search_type="mmr", search_kwargs={"k": 1})
     results = retriever.get_relevant_documents(query)
     similar = set()
@@ -36,8 +42,9 @@ def get_similar_products_kb(query):
     # Fallback: if no similar products found, return the first 3 products as default.
     if not similar:
         similar = set(list(product_images.keys())[:3])
-        
+
     return list(similar)
+
 
 def display_similar_products(similar_products):
     """
@@ -53,6 +60,7 @@ def display_similar_products(similar_products):
                 cols[idx].caption(prod)
             else:
                 cols[idx].warning(f"Image not found for {prod}")
+
 
 def main():
     st.set_page_config(page_title="Product Q&A", page_icon="🍲", layout="wide")
@@ -101,7 +109,7 @@ def main():
         for suggestion in suggestions:
             if st.button(suggestion, key=suggestion, type="primary"):
                 # Update effective query without modifying the widget value.
-                st.session_state.effective_query = suggestion  
+                st.session_state.effective_query = suggestion
                 with st.spinner("Thinking..."):
                     answer_response = generate_knowledge_answer(suggestion)
                 if "chat_history" not in st.session_state:
@@ -153,7 +161,9 @@ def main():
     st.markdown("---")
     # Display similar products only if there's at least one conversation message.
     if st.session_state.chat_history:
-        query_for_similar = st.session_state.get("effective_query", st.session_state.user_query)
+        query_for_similar = st.session_state.get(
+            "effective_query", st.session_state.user_query
+        )
         if query_for_similar:
             similar_products = get_similar_products_kb(query_for_similar)
             display_similar_products(similar_products)
@@ -171,6 +181,7 @@ def main():
             )
         else:
             col.warning(f"Image not found: {img_path}")
+
 
 if __name__ == "__main__":
     main()
