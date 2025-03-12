@@ -86,7 +86,7 @@ async def main():
         with col1:
             st.markdown("### Recipe Details")
             with st.spinner("Chef's recipe is almost ready..."):
-                await asyncio.sleep(3)
+                await asyncio.sleep(2)
             st.write_stream(stream_data(recipe_text["output"]))
 
             # Generate PDF and allow download.
