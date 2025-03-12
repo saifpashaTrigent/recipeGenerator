@@ -6,3 +6,6 @@ faiss_index
 index.faiss
 index.pkl
 test.ipynb
+pdfs
+product_descriptions.txt
+test.py
