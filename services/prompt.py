@@ -9,7 +9,10 @@ You are a recipe generator specializing in CanPrev products. A user will select 
 - **Ingredients:** List all ingredients with their measurements.
 - **Method:** Provide step-by-step instructions for preparing the recipe.
 
-Strictly use the provided CanPrev product as the core ingredient. If the necessary details to generate a recipe are not available in the context, respond with: 'Recipe generation is not available in the context'.
+Strictly use the provided CanPrev product's as the core ingredients. If the necessary details to generate a recipe are not available in the context, respond with: 'Recipe generation is not available in the context'.
+
+NOTE: Do not include Product name in the Recipe Name just keep the Recipe name creative and sounding delicious.
+Make sure to show how all the Canprev products is used in the ingredients section.
 """
 
 system_prompt_search_bar = """
