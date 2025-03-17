@@ -15,6 +15,7 @@ from services.constants import CANPREV_IMAGE_PATH
 
 load_dotenv(override=True)
 
+
 async def main():
     st.set_page_config(page_title="Recipe Generator", page_icon="🍲", layout="wide")
 
@@ -35,8 +36,7 @@ async def main():
         st.image(CANPREV_IMAGE_PATH, width=160)
         st.header("Select Categories")
         selected_categories = st.multiselect(
-            "Product Categories:",
-            options=list(product_categories.keys())
+            "Product Categories:", options=list(product_categories.keys())
         )
 
         # Build a combined product list from the chosen categories
@@ -49,10 +49,7 @@ async def main():
             available_products = []
 
         st.header("Select Products")
-        selected_products = st.multiselect(
-            "Products:",
-            options=available_products
-        )
+        selected_products = st.multiselect("Products:", options=available_products)
 
         # Show images of selected products (if any)
         if selected_products:
@@ -85,13 +82,15 @@ async def main():
         if not selected_products:
             st.warning("Please select at least one product.")
         else:
-            with st.spinner("Hold on... our genius chef is busy inventing a recipe for you...!"):
+            with st.spinner(
+                "Hold on... our genius chef is busy inventing a recipe for you...!"
+            ):
                 # Combine selected products into a single query
                 final_query = " ".join(selected_products)
                 # Append any custom instructions
                 if custom_instructions.strip():
-                    final_query += " " + custom_instructions.strip()
-                    print("Final Query:", final_query)
+                    final_query = f"generate a recipe using {final_query} and I want {custom_instructions.strip()}"
+                    # final_query += " " + custom_instructions.strip()
 
                 # 1) Generate the recipe text
                 recipe_text = await generate_recipe(final_query)
@@ -105,7 +104,11 @@ async def main():
             with col2:
                 st.markdown("### Recipe Image")
                 if recipe_image_url:
-                    st.image(recipe_image_url, caption=", ".join(selected_products), width=400)
+                    st.image(
+                        recipe_image_url,
+                        caption=", ".join(selected_products),
+                        width=400,
+                    )
                 else:
                     st.warning("Could not generate recipe image.")
 
@@ -129,6 +132,7 @@ async def main():
                         )
                     else:
                         st.error("Error generating PDF.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
