@@ -13,14 +13,11 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from services.prompt import system_prompt
 from services.constants import DATA_FOLDER, VECTOR_DB
-from langchain.embeddings import HuggingFaceInferenceAPIEmbeddings
+from langchain.embeddings import FakeEmbeddings
 
 # Use HuggingFaceInferenceAPIEmbeddings which works well in cloud environments
 # This doesn't require downloading models, it uses the HuggingFace Inference API
-embeddings = HuggingFaceInferenceAPIEmbeddings(
-    api_key=st.secrets.get("HUGGINGFACE_API_KEY", ""),
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+embeddings = FakeEmbeddings(size=1536)
 
 api_key = st.secrets.get("OPENAI_API_KEY")
 
