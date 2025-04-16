@@ -13,9 +13,12 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from services.prompt import system_prompt
 from services.constants import DATA_FOLDER, VECTOR_DB
+from langchain.embeddings import FakeEmbeddings
+
+# Use FakeEmbeddings for testing - this doesn't require any external dependencies
+embeddings = FakeEmbeddings(size=1536)
 
 api_key = st.secrets.get("OPENAI_API_KEY")
-embeddings = OpenAIEmbeddings(api_key=api_key)
 
 
 def get_pdf_texts():
