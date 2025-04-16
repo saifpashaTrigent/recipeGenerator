@@ -3,7 +3,6 @@ import time
 import openai
 import asyncio
 import streamlit as st
-from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from services.utils import azureLlm, imageClient
 from langchain_openai import OpenAIEmbeddings
@@ -15,9 +14,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from services.prompt import system_prompt
 from services.constants import DATA_FOLDER, VECTOR_DB
 
-load_dotenv(override=True)
-
-embeddings = OpenAIEmbeddings()
+api_key = st.secrets.get("OPENAI_API_KEY")
+embeddings = OpenAIEmbeddings(api_key=api_key)
 
 
 def get_pdf_texts():

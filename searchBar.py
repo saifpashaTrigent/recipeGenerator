@@ -1,6 +1,5 @@
 import os
 import streamlit as st
-from dotenv import load_dotenv
 from functions.product_details import product_categories, product_images
 from functions.recipeProcessor import (
     get_pdf_texts,
@@ -15,7 +14,6 @@ from functions.searchBarProcessor import (
 )
 from services.constants import CANPREV_IMAGE_PATH
 
-load_dotenv(override=True)
 
 
 def get_similar_products_kb(query):

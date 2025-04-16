@@ -2,14 +2,12 @@ import json
 import streamlit as st
 from services.utils import azureLlm, Azureclient
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
 from functions.recipeProcessor import get_knowledge_hub_instance
 from langchain.tools.retriever import create_retriever_tool
 from services.prompt import system_prompt_search_bar
 
 
-load_dotenv(override=True)
 
 
 def get_autocomplete_suggestions(partial_query):

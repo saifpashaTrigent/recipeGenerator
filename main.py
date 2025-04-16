@@ -1,7 +1,6 @@
 import os
 import asyncio
 import streamlit as st
-from dotenv import load_dotenv
 from functions.product_details import product_categories, product_images
 from functions.pdf import parse_recipe_name, create_pdf
 from functions.recipeProcessor import (
@@ -13,7 +12,7 @@ from functions.recipeProcessor import (
 )
 from services.constants import CANPREV_IMAGE_PATH
 
-load_dotenv(override=True)
+
 
 
 async def main():
