@@ -13,10 +13,14 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from services.prompt import system_prompt
 from services.constants import DATA_FOLDER, VECTOR_DB
-from langchain.embeddings import FakeEmbeddings
+from langchain.embeddings import HuggingFaceInferenceAPIEmbeddings
 
-# Use FakeEmbeddings for testing - this doesn't require any external dependencies
-embeddings = FakeEmbeddings(size=1536)
+# Use HuggingFaceInferenceAPIEmbeddings which works well in cloud environments
+# This doesn't require downloading models, it uses the HuggingFace Inference API
+embeddings = HuggingFaceInferenceAPIEmbeddings(
+    api_key=st.secrets.get("HUGGINGFACE_API_KEY", ""),
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
 api_key = st.secrets.get("OPENAI_API_KEY")
 
@@ -112,10 +116,10 @@ async def generate_recipe_image(recipe_description: str):
     
 )
 
-    try:
+    try:            
         response = imageClient.images.generate(prompt=prompt, n=1, size="1024x1024",model="dall-e-3")
         return response.data[0].url
-    except Exception:
+    except Exception as e:
         return None
 
 
