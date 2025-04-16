@@ -12,4 +12,5 @@ test.py
 .qodo
 covertToImages.ipynb
 CanPrev_dataset.xlsx
+.env
 # downloaded_images
